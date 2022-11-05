@@ -27,6 +27,10 @@ namespace ScreenCapture.Controllers
         {
             return View();
         }
+        public IActionResult Screenshot()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

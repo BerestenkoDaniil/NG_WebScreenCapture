@@ -1,75 +1,63 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿let preview = document.getElementById("preview");
+let recording = document.getElementById("recording");
+let startButton = document.getElementById("startButton");
+let stopButton = document.getElementById("stopButton");
+let downloadButton = document.getElementById("downloadButton");
+let logElement = document.getElementById("log");
 
-// Write your JavaScript code.
-const videoElem = document.getElementById("video");
-const logElem = document.getElementById("log");
-const startElem = document.getElementById("start");
-const stopElem = document.getElementById("stop");
-
-// Options for getDisplayMedia()
-
-const displayMediaOptions = {
-    video: {
-        cursor: "always"
-    },
-    audio: false
-};
-
-// Set event listeners for the start and stop buttons
-startElem.addEventListener("click", (evt) => {
-    startCapture();
-}, false);
-
-stopElem.addEventListener("click", (evt) => {
-    stopCapture();
-}, false);
-
-console.log = (msg) => logElem.innerHTML += `${msg}<br>`;
-console.error = (msg) => logElem.innerHTML += `<span class="error">${msg}</span><br>`;
-console.warn = (msg) => logElem.innerHTML += `<span class="warn">${msg}<span><br>`;
-console.info = (msg) => logElem.innerHTML += `<span class="info">${msg}</span><br>`;
-
-async function startCapture() {
-    logElem.innerHTML = "";
-
-    try {
-        videoElem.srcObject = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-        dumpOptionsInfo();
-    } catch (err) {
-        console.error(`Error: ${err}`);
-    }
+let recordingTimeMS = 10000;
+function log(msg) {
+    logElement.innerHTML += msg + "\n";
 }
-
-function stopCapture(evt) {
-    let tracks = videoElem.srcObject.getTracks();
-
-    tracks.forEach((track) => track.stop());
-    videoElem.srcObject = null;
+function wait(delayInMS) {
+    return new Promise(resolve => setTimeout(resolve, delayInMS));
 }
+function startRecording(stream, lengthInMS) {
+    let recorder = new MediaRecorder(stream);
+    let data = [];
 
-function dumpOptionsInfo() {
-    const videoTrack = videoElem.srcObject.getVideoTracks()[0];
+    recorder.ondataavailable = event => data.push(event.data);
+    recorder.start();
+    log(recorder.state + " for " + (lengthInMS / 1000) + " seconds...");
 
-    console.info("Track settings:");
-    console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
-    console.info("Track constraints:");
-    console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
-}
-
-// Send the drawn image to the server
-$('#sendBtn').live('click', function () {
-    var image = graph[0].toDataURL("image/png");
-    image = image.replace('data:image/png;base64,', '');
-
-    $.ajax({
-        type: 'POST',
-        url: '/Default.aspx/UploadImage',
-        data: '{ "imageData" : "' + image + '" }',
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'json',
-        success: function (msg) {
-            alert('Image sent!');
-        }
+    let stopped = new Promise((resolve, reject) => {
+        recorder.onstop = resolve;
+        recorder.onerror = event => reject(event.name);
     });
-});
+
+    let recorded = wait(lengthInMS).then(
+        () => recorder.state == "recording" && recorder.stop()
+    );
+
+    return Promise.all([
+        stopped,
+        recorded
+    ])
+        .then(() => data);
+}
+function stop(stream) {
+    stream.getTracks().forEach(track => track.stop());
+}
+startButton.addEventListener("click", function () {
+    navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: true
+    }).then(stream => {
+        preview.srcObject = stream;
+        downloadButton.href = stream;
+        preview.captureStream = preview.captureStream || preview.mozCaptureStream;
+        return new Promise(resolve => preview.onplaying = resolve);
+    }).then(() => startRecording(preview.captureStream(), recordingTimeMS))
+        .then(recordedChunks => {
+            let recordedBlob = new Blob(recordedChunks, { type: "video/webm" });
+            recording.src = URL.createObjectURL(recordedBlob);
+            downloadButton.href = recording.src;
+            downloadButton.download = "RecordedVideo.webm";
+
+            log("Successfully recorded " + recordedBlob.size + " bytes of " +
+                recordedBlob.type + " media.");
+        })
+        .catch(log);
+}, false); stopButton.addEventListener("click", function () {
+    stop(preview.srcObject);
+}, false);
