@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using Org.BouncyCastle.Asn1.X509;
 using ScreenCapture.Models;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,19 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.InkML;
+using System.Net;
 
 namespace ScreenCapture.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private object _env;
+
+        public object RequestID { get; private set; }
 
         public HomeController(ILogger<HomeController> logger)
         {
@@ -39,9 +47,23 @@ namespace ScreenCapture.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        public IActionResult DownloadFile(string filePath)
+        [HttpGet]
+        public IActionResult FileDownload(string filename)
         {
-            return PhysicalFile(filePath, MimeTypes.GetMimeType(filePath), Path.GetFileName(filePath));
+            string DownloadFileName = filename;
+            if (filename != null)
+            {
+                var Folder = RequestID.ToString();
+                string fileview = Path.Combine(_env.WebRootPath, "Documents", Folder, filename);
+                WebClient User = new WebClient();
+                Byte[] fileBuffer = System.IO.File.ReadAllBytes(fileview);
+                if (fileBuffer != null)
+                {
+                    //return File(fileBuffer, "application/octet-stream", filename);
+                }
+            }
+            return null;
+
         }
     }
 }

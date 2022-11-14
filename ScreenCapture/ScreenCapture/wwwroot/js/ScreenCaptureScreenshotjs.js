@@ -21,7 +21,22 @@ startButton.addEventListener("click", function () {
             canvas.toBlob(blob => {
                 // Do things with blob here
                 console.log('output blob:', blob);
+
             });
         });
     })
 });
+
+//$("#FileDownloadBtn").click(function () {
+//    event.preventDefault();
+//    var rootPath = '@Url.Content("~")';
+//    $.ajax({
+//        type: "post",
+//        url: rootpath + "/RequestFormEdit?handler=FileDownload",
+//        data: { filename: this.value}
+//        success: function (data) {
+
+//        }
+
+//    })
+//})

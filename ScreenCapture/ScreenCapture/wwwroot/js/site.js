@@ -51,6 +51,7 @@ startButton.addEventListener("click", function () {
         .then(recordedChunks => {
             let recordedBlob = new Blob(recordedChunks, { type: "video/webm" });
             recording.src = URL.createObjectURL(recordedBlob);
+            console.log(recording.src);
             downloadButton.href = recording.src;
             downloadButton.download = "RecordedVideo.webm";
 
