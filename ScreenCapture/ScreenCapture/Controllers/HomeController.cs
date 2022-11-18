@@ -1,18 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MimeKit;
-using Org.BouncyCastle.Asn1.X509;
 using ScreenCapture.Models;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Azure.Storage.Blobs;
-using DocumentFormat.OpenXml.Spreadsheet;
-using DocumentFormat.OpenXml.InkML;
-using System.Net;
 
 namespace ScreenCapture.Controllers
 {
@@ -47,23 +37,48 @@ namespace ScreenCapture.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        [HttpGet]
-        public IActionResult FileDownload(string filename)
+        //[HttpGet]
+        //public IActionResult FileDownload(string filename)
+        //{
+        //    string DownloadFileName = filename;
+        //    if (filename != null)
+        //    {
+        //        var Folder = RequestID.ToString();
+        //        string fileview = Path.Combine(_env.WebRootPath, "Documents", Folder, filename);
+        //        WebClient User = new WebClient();
+        //        Byte[] fileBuffer = System.IO.File.ReadAllBytes(fileview);
+        //        if (fileBuffer != null)
+        //        {
+        //            //return File(fileBuffer, "application/octet-stream", filename);
+        //        }
+        //    }
+        //    return null;
+
+        //}
+        [HttpPost]
+        public IActionResult Upload(FileModel model)
         {
-            string DownloadFileName = filename;
-            if (filename != null)
+            if (ModelState.IsValid)
             {
-                var Folder = RequestID.ToString();
-                string fileview = Path.Combine(_env.WebRootPath, "Documents", Folder, filename);
-                WebClient User = new WebClient();
-                Byte[] fileBuffer = System.IO.File.ReadAllBytes(fileview);
-                if (fileBuffer != null)
+
+                string path = "/Screenshot";
+
+                //create folder if not exist
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+
+                //get file extension
+                FileInfo fileInfo = new FileInfo(model.File.FileName);
+                string fileName = model.FileName + fileInfo.Extension;
+
+                string fileNameWithPath = Path.Combine(path, fileName);
+
+                using (var stream = new FileStream(fileNameWithPath, FileMode.Create))
                 {
-                    //return File(fileBuffer, "application/octet-stream", filename);
+                    model.File.CopyTo(stream);
                 }
             }
-            return null;
-
+            return View();
         }
     }
 }

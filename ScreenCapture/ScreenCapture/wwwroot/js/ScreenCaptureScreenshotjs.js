@@ -1,6 +1,7 @@
 ﻿let preview = document.getElementById("preview");
 let capture = document.getElementById("capture");
 let canvas = document.getElementById('canvas');
+let upload = document.getElementById("upload");
 
 // Request media
 startButton.addEventListener("click", function () {
@@ -40,3 +41,25 @@ startButton.addEventListener("click", function () {
 
 //    })
 //})
+upload.addEventListener("click",function () {
+    var fileUpload = $("canvas");
+    var files = fileUpload.files;
+    var my_canvas = document.getElementById('canvas'),
+        context = my_canvas.getContext("2d");
+    var img = canvas.toDataURL("image/png");
+    console.log(img);
+    // Create  a FormData object
+    var fileData = new FormData();
+    fileData.append(img);
+    $.ajax({
+        url: '/Home/Upload', //URL to upload files 
+        type: "POST", //as we will be posting files and other method POST is used
+        data: fileData,
+        success: function (result) {
+            alert(result);
+        },
+        error: function (err) {
+            alert(err.statusText);
+        }
+    });
+})
