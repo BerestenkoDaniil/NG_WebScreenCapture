@@ -28,38 +28,21 @@ startButton.addEventListener("click", function () {
     })
 });
 
-//$("#FileDownloadBtn").click(function () {
-//    event.preventDefault();
-//    var rootPath = '@Url.Content("~")';
-//    $.ajax({
-//        type: "post",
-//        url: rootpath + "/RequestFormEdit?handler=FileDownload",
-//        data: { filename: this.value}
-//        success: function (data) {
-
-//        }
-
-//    })
-//})
-upload.addEventListener("click",function () {
-    var fileUpload = $("canvas");
-    var files = fileUpload.files;
-    var my_canvas = document.getElementById('canvas'),
-        context = my_canvas.getContext("2d");
-    var img = canvas.toDataURL("image/png");
-    console.log(img);
-    // Create  a FormData object
-    var fileData = new FormData();
-    fileData.append(img);
-    $.ajax({
-        url: '/Home/Upload', //URL to upload files 
-        type: "POST", //as we will be posting files and other method POST is used
-        data: fileData,
-        success: function (result) {
-            alert(result);
-        },
-        error: function (err) {
-            alert(err.statusText);
+upload.addEventListener("click", function () {
+    html2canvas(document.body, {
+        onrendered: function (canvas) {
+            var mergedImage = canvas.toDataURL("image/png");
+            mergedImage = mergedImage.replace('data:image/png;base64,', '');
+            var param = { imageData: mergedImage };
+            $http({
+                method: 'POST',
+                url: '/Home/UploadImage',
+                data: JSON.stringify(param),
+                dataType: 'JSON',
+                headers: { 'content-type': 'application/json' }
+            }).then(function (_response) {
+                alert('Your photos successfully uploaded!');
+            });
         }
-    });
+    })
 })
