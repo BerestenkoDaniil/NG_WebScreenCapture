@@ -1,8 +1,12 @@
 ﻿<div id="startButton" class="button">
     Capture
 </div>
-<canvas id="canvas"></canvas>
+<a>
+    <canvas width="1000" height="800" id="canvas"></canvas>
+</a>
+
 @*<button class="badge badge-primary badge-pill" value="@item.Name" id="FileDownloadBtn">Download</button>*@
 @*<asp:Button Text="Upload" runat="server" OnClientClick="UploadImage" OnClick="Upload" />*@
-<button id="upload">Upload</button>
-<script src="../js/ScreenCaptureScreenshotjs.js"></script>
+<button onclick="ShanuSaveImage()">Upload</button>
+<button onclick="download()">Download</button>
+<script src="../../js/Screenshot.js"></script>
