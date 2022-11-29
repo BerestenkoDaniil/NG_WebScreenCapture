@@ -26,11 +26,9 @@ namespace ScreenCapture.Controllers
     {
         private readonly ILogger<HomeController> _logger;
 
-        private readonly IWebHostEnvironment Environment;
-        private IWebHostEnvironment _environment;
+        private readonly IWebHostEnvironment _environment;
 
 
-        //private readonly IWebHostEnvironment _appEnvironment;
 
         public object RequestID { get; private set; }
 
@@ -95,7 +93,7 @@ namespace ScreenCapture.Controllers
         string base64 = Request.Form["imgCropped"];
         byte[] bytes = Convert.FromBase64String(base64.Split(',')[1]);
 
-        string filePath = Path.Combine(this.Environment.WebRootPath, "Images", "Cropped.png");
+        string filePath = Path.Combine(_environment.WebRootPath, "Images", "Cropped.png");
         using (FileStream stream = new FileStream(filePath, FileMode.Create))
         {
             stream.Write(bytes, 0, bytes.Length);
@@ -109,6 +107,7 @@ namespace ScreenCapture.Controllers
     //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     //}
 
-}}
+    }
+}
 
 

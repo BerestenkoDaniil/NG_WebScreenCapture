@@ -31,7 +31,7 @@ startButton.addEventListener("click", function () {
 
 document.getElementById('canvas').onclick = function () {
     $(this).parent().attr('href', document.getElementById('canvas').toDataURL());
-    $(this).parent().attr('download', "myPicture.png");
+    $(this).parent().attr('download', "Screenshot.png");
 };
 
 
