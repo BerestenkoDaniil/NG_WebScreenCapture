@@ -59,54 +59,36 @@ namespace ScreenCapture.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
         [HttpPost]
-        public ContentResult UploadImage(string imageData)
+        public IActionResult UploadImage()
         {
-            try
+            string base64 = Request.Form["Screenshot"];
+            byte[] bytes = Convert.FromBase64String(base64.Split(',')[1]);
+            string filename = DateTime.Now.ToString().Replace("/", "-").Replace(" ", "-").Replace(":", "") + ".png";
+
+            string filePath = Path.Combine(_environment.WebRootPath, "Screenshot", filename);
+            using (FileStream stream = new FileStream(filePath, FileMode.Create))
             {
-                string fileName = DateTime.Now.ToString().Replace("/", "-").Replace(" ", "-").Replace(":", "") + ".png";
-                string path = Path.Combine(_environment.WebRootPath, "Screenshot");
-
-                if (Directory.Exists(path))
-                {
-                    using (FileStream fs = new FileStream(Path.Combine(path,fileName), FileMode.Create))
-                    {
-                        using (BinaryWriter bw = new BinaryWriter(fs))
-                        {
-                            byte[] data = Convert.FromBase64String(imageData);
-                            bw.Write(data);
-                            bw.Close();
-                        }
-                    }
-                }
+                stream.Write(bytes, 0, bytes.Length);
+                stream.Flush();
             }
-            catch (Exception ex)
-            {
-
-            }
-
-            return Content("Uploaded");
+            return RedirectToAction("Screenshot");
         }
     
-    [HttpPost]
-    public IActionResult Save()
-    {
-        string base64 = Request.Form["imgCropped"];
-        byte[] bytes = Convert.FromBase64String(base64.Split(',')[1]);
-
-        string filePath = Path.Combine(_environment.WebRootPath, "Images", "Cropped.png");
-        using (FileStream stream = new FileStream(filePath, FileMode.Create))
+        [HttpPost]
+        public IActionResult Save()
         {
-            stream.Write(bytes, 0, bytes.Length);
-            stream.Flush();
-        }
-        return RedirectToAction("Index");
-    }
-    //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    //public IActionResult Error()
-    //{
-    //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-    //}
+            string base64 = Request.Form["imgCropped"];
+            byte[] bytes = Convert.FromBase64String(base64.Split(',')[1]);
+            string filename = DateTime.Now.ToString().Replace("/", "-").Replace(" ", "-").Replace(":", "") + ".png";
 
+                string filePath = Path.Combine(_environment.WebRootPath, "Images", filename);
+            using (FileStream stream = new FileStream(filePath, FileMode.Create))
+            {
+                stream.Write(bytes, 0, bytes.Length);
+                stream.Flush();
+            }
+            return RedirectToAction("Index");
+        }
     }
 }
 

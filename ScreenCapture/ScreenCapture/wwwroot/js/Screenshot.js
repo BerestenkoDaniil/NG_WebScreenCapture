@@ -29,7 +29,8 @@ startButton.addEventListener("click", function () {
 });
 
 
-document.getElementById('canvas').onclick = function () {
+
+document.getElementById('canvas').onclick = function (date,time) {
     $(this).parent().attr('href', document.getElementById('canvas').toDataURL());
     $(this).parent().attr('download', "Screenshot.png");
 };
@@ -57,7 +58,7 @@ function ShanuSaveImage() {
             type: 'POST',
             url: '/Home/UploadImage',
             data: '{ "imageData" : "' + image_NEW + '" }',
-            contentType: 'application/json; charset=utf-8',
+            contentType: 'image/jpeg',
             dataType: 'json',
             success: function (msg) {
                 alert('Image saved to your root Folder !');
@@ -65,3 +66,20 @@ function ShanuSaveImage() {
         });
     }
 }   
+
+
+
+function passvalue() {
+    var image = document.getElementById("canvas").value;
+    localStorage.setItem("imagevalue", image);
+    return false;
+    window.location.replace("Privacy.cshtml")
+}
+
+canvas.onload = function () {
+    canvas.height = height;
+    canvas.width = width;
+    context.drawImage(img, x1, y1, width, height, 0, 0, width, height);
+    $('#imgCropped').val(canvas.toDataURL());
+    $('#btnUpload').show();
+};
